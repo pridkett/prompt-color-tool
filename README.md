@@ -58,18 +58,13 @@ For armv7 Linux (i.e. Raspberry Pi running 32 bit OS):
 docker run --rm -it -v "$(pwd)":/home/rust/src messense/rust-musl-cross:armv7-musleabihf cargo build --release
 ```
 
-For aarch64 MacOS there's an issue with the builder image that I'm using not being able to strip Mach-O binaries. The image has `llmv-strip` installed, but even if you manually specify the compiler, it seems like `rustc` is calling the system level `strip` command. This is why the `release` target doesn't have stripping, but it's specified by architecture in `.cargo/config.toml`.
+For aarch64 MacOS there's an issue with the builder image that I'm using not being able to strip Mach-O binaries. The image has `llvm-strip` installed, but there's not an easy (any?) way to get `rustc` to call it. This little hack takes advantage of the fact that /root/.cargo/bin comes first in the path, so we do something bad and just symlink it there. This hack makes it so `rustc` calls `llvm-strip` without really knowing it.
 
 ```bash
 docker run --rm -it -v "$(pwd)":/root/src --workdir /root/src joseluisq/rust-linux-darwin-builder:1.82.0 \
-sh -c "cargo build --release --target aarch64-apple-darwin && llvm-strip target/aarch64-apple-darwin/release/prompt_color_tool"
+sh -c "ln -s /usr/bin/llvm-strip /root/.cargo/bin/strip && cargo build --release --target aarch64-apple-darwin"
 ```
 
-Unfortunately, this cascades through to compiling natively on MacOS, so you'll need to manually strip the binary if you want to do that.
-
-```bash
-cargo build --release &&& strip target/release/prompt_color_tool
-```
 
 Caveats
 -------
