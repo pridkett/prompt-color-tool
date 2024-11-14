@@ -91,6 +91,7 @@ fn calculate_hostname_background_color(hostname: Option<&str>) -> u8 {
                 .split('.')
                 .next()
                 .unwrap_or("localhost")
+                .trim()
                 .to_string()
         }
     };
