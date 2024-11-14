@@ -101,9 +101,9 @@ fn main() {
             if hex_output {
                 let bg_rgb = xterm_to_rgb(bgcolor);
                 let fg_rgb = xterm_to_rgb(fgcolor);
-                output_colors(&fg_rgb.to_hex(), &bg_rgb.to_hex(), verbose_output, fgonly_output, bgonly_output);
+                output_colors(&bg_rgb.to_hex(), &fg_rgb.to_hex(), verbose_output, fgonly_output, bgonly_output);
             } else {
-                output_colors(&fgcolor.to_string(), &bgcolor.to_string(), verbose_output, fgonly_output, bgonly_output);
+                output_colors(&bgcolor.to_string(), &fgcolor.to_string(), verbose_output, fgonly_output, bgonly_output);
             }
         },
         Err(e) => eprintln!("Error calculating foreground color: {}", e),
@@ -112,7 +112,7 @@ fn main() {
 
 fn output_colors(bgcolor: &str, fgcolor: &str, verbose: bool, fgonly: bool, bgonly: bool) {
     if verbose {
-        println!("bgcolor: {}, fgcolor: {}", fgcolor, bgcolor);
+        println!("bgcolor: {}, fgcolor: {}", bgcolor, fgcolor);
     } else if fgonly {
         println!("{}", fgcolor);
     } else if bgonly {
