@@ -3,6 +3,14 @@ name = "prompt_color_tool"
 version = "0.1.0"
 edition = "2021"
 
+[profile.release]
+opt-level = 3            # Optimize for size, or you can use `3` for highest performance
+lto = true               # Enable Link-Time Optimization for better performance
+codegen-units = 1        # Helps improve optimization at the cost of compilation time
+debug = false            # Strip out debug symbols to minimize the size
+panic = "abort"          # Smaller binary by avoiding panic unwind code
+strip = true             # Removes symbol tables and debug information for smaller binaries
+
 [dependencies]
 base16ct = "0.2.0"
 clap = "4.5.21"
