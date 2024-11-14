@@ -22,14 +22,14 @@ prompt_color_tool [OPTIONS] [hostname]
 
 If `hostname` is not provided on the command line, the program will grab the system short hostname and use that.
 
-* --theme <theme>   The theme to use for color calculation [default: `default` - other values are `low-contrast`, `solarized-light16`, and `solarized-dark16`]
-* --hex             Output colors in hexadecimal format
-* --bgcolor <color> A fixed color to use as the background color. This must be in the range of 0-255. This is for the use case when you know that the hash of the name is going to generate an unpleasant color and you want to override, but still calculate the foreground color or have an easy way to get it as hex, etc.
-* -v, --verbose     Print verbose output. There's really not much here, but it will tell you which number is which.
-* -f, --fgonly      Only output the foreground color. Useful if you don't want to do other shell scripting to separate the numbers.
-* -b, --bgonly      Only output the background color. Useful if you don't want to do other shell scripting to separate the numbers.
+* `--theme <theme>`   The theme to use for color calculation [default: `default` - other values are `low-contrast`, `solarized-light16`, and `solarized-dark16`]
+* `--hex`             Output colors in hexadecimal format
+* `--bgcolor <color>` A fixed color to use as the background color. This must be in the range of 0-255. This is for the use case when you know that the hash of the name is going to generate an unpleasant color and you want to override, but still calculate the foreground color or have an easy way to get it as hex, etc.
+* `-v`, `--verbose`     Print verbose output. There's really not much here, but it will tell you which number is which.
+* `-f`, `--fgonly`      Only output the foreground color. Useful if you don't want to do other shell scripting to separate the numbers.
+* `-b`, `--bgonly`      Only output the background color. Useful if you don't want to do other shell scripting to separate the numbers.
 
-### Hostname to Color Mapping
+### Hostname to Color Mapping Algorithm
 
 Because I use [powerline-go][powerline-go], I wanted to ensure that the [automatically selected colors were the same as those used in the powerline-go algorithm][powerline-go-algorithm].
 
