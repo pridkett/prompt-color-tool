@@ -10,6 +10,25 @@ November 2024
 Overview
 --------
 
+I've been working on various ways that I can have consistent colors across my machines. And what I mean by consistent is not so much to have the same colors on each machine, but to have different colors on each machine, but have them sync'd up between applications like powerline-go, tmux, and iTerm.
+
+I was able to do this with a lot of shell scripting, but in the end, it just kinda turned into a mess. So, I created this program to provide a single consistent reference point for me on how to calculate the colors, either as one of the 256 xterm colors or as hex, and use them in various programs.
+
+### Usage
+
+```
+prompt_color_tool [OPTIONS] [hostname]
+```
+
+If `hostname` is not provided on the command line, the program will grab the system short hostname and use that.
+
+* --theme <theme>   The theme to use for color calculation [default: `default` - other values are `low-contrast`, `solarized-light16`, and `solarized-dark16`]
+* --hex             Output colors in hexadecimal format
+* --bgcolor <color> A fixed color to use as the background color. This must be in the range of 0-255. This is for the use case when you know that the hash of the name is going to generate an unpleasant color and you want to override, but still calculate the foreground color or have an easy way to get it as hex, etc.
+* -v, --verbose     Print verbose output. There's really not much here, but it will tell you which number is which.
+* -f, --fgonly      Only output the foreground color. Useful if you don't want to do other shell scripting to separate the numbers.
+* -b, --bgonly      Only output the background color. Useful if you don't want to do other shell scripting to separate the numbers.
+
 ### Hostname to Color Mapping
 
 Because I use [powerline-go][powerline-go], I wanted to ensure that the [automatically selected colors were the same as those used in the powerline-go algorithm][powerline-go-algorithm].
@@ -19,6 +38,38 @@ Because I use [powerline-go][powerline-go], I wanted to ensure that the [automat
 3. Take the first byte of the hash and run modulo 128 on it to get a number between 0 and 127
 4. Use the number to select a color from the xterm 256 color palette
 
+Compilation Notes
+-----------------
+
+This section is more for myself, so I remember, but other people might find it interesting. After trying to muck around with installing various cross-architecture toolchains on my Mac, and getting some to work and some failing miserably, I think the easiest way to do static cross-compilation is just to use docker. Here's the commands that I use.
+
+For x86_64 Linux:
+```bash
+docker run --rm -it -v "$(pwd)":/home/rust/src messense/rust-musl-cross:x86_64-musl cargo build --release
+```
+
+For aarch64 Linux (i.e. Raspberry Pi running 64 bit OS):
+```bash
+docker run --rm -it -v "$(pwd)":/home/rust/src messense/rust-musl-cross:aarch64-musl cargo build --release
+```
+
+For armv7 Linux (i.e. Raspberry Pi running 32 bit OS):
+```bash
+docker run --rm -it -v "$(pwd)":/home/rust/src messense/rust-musl-cross:armv7-musleabihf cargo build --release
+```
+
+For aarch64 MacOS there's an issue with the builder image that I'm using not being able to strip Mach-O binaries. The image has `llmv-strip` installed, but even if you manually specify the compiler, it seems like `rustc` is calling the system level `strip` command. This is why the `release` target doesn't have stripping, but it's specified by architecture in `.cargo/config.toml`.
+
+```bash
+docker run --rm -it -v "$(pwd)":/root/src --workdir /root/src joseluisq/rust-linux-darwin-builder:1.82.0 \
+sh -c "cargo build --release --target aarch64-apple-darwin && llvm-strip target/aarch64-apple-darwin/release/prompt_color_tool"
+```
+
+Unfortunately, this cascades through to compiling natively on MacOS, so you'll need to manually strip the binary if you want to do that.
+
+```bash
+cargo build --release &&& strip target/release/prompt_color_tool
+```
 
 Caveats
 -------

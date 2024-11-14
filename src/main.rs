@@ -29,6 +29,27 @@ fn main() {
                 .index(1),
         )
         .arg(
+            Arg::new("verbose")
+                .help("Use more verbose output")
+                .long("verbose")
+                .short('v')
+                .action(clap::ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new("fgonly")
+                .help("Only output the foreground color")
+                .long("fgonly")
+                .short('f')
+                .action(clap::ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new("bgonly")
+                .help("Only output the background color")
+                .long("bgonly")
+                .short('b')
+                .action(clap::ArgAction::SetTrue),
+        )
+        .arg(
             Arg::new("theme")
                 .help("The theme to use for color calculation")
                 .long("theme")
@@ -41,25 +62,63 @@ fn main() {
                 .long("hex")
                 .action(clap::ArgAction::SetTrue),
         )
+        .arg(
+            Arg::new("bgcolor")
+                .help("The background color to use")
+                .long("bgcolor")
+                .num_args(1)
+                .default_value(None),
+        )
         .get_matches();
 
     let hex_output = matches.get_flag("hex");
+    let verbose_output = matches.get_flag("verbose");
+    let fgonly_output = matches.get_flag("fgonly");
+    let bgonly_output = matches.get_flag("bgonly");
+
+    if (fgonly_output as u8 + bgonly_output as u8 + verbose_output as u8) >= 2 {
+        eprintln!("Error: Cannot specify more than one of --fgonly, --bgonly, and --verbose");
+        return;
+    }
 
     let input_hostname = matches.get_one::<String>("hostname").map(|s| s.as_str());
     let input_theme = matches.get_one::<String>("theme").map(|s| s.as_str());
 
-    let bgcolor = calculate_hostname_background_color(input_hostname);
+    let input_bgcolor = matches.get_one::<String>("bgcolor").map(|s| s.as_str());
+    let mut bgcolor_set = false;
+    let mut bgcolor:u8 = 0;
+    if input_bgcolor != None && input_bgcolor != Some("") {
+        bgcolor = input_bgcolor.unwrap().parse::<u8>().expect("Failed to parse background color");
+        bgcolor_set = true;
+    }
+
+    if !bgcolor_set {
+        bgcolor = calculate_hostname_background_color(input_hostname);
+    }
+
     match calculate_hostname_foreground_color(bgcolor, input_theme) {
         Ok(fgcolor) => {
             if hex_output {
                 let bg_rgb = xterm_to_rgb(bgcolor);
                 let fg_rgb = xterm_to_rgb(fgcolor);
-                println!("bgcolor: #{}, fgcolor: #{}", bg_rgb.to_hex(), fg_rgb.to_hex());
+                output_colors(&fg_rgb.to_hex(), &bg_rgb.to_hex(), verbose_output, fgonly_output, bgonly_output);
             } else {
-                println!("bgcolor: {}, fgcolor: {}", bgcolor, fgcolor);
+                output_colors(&fgcolor.to_string(), &bgcolor.to_string(), verbose_output, fgonly_output, bgonly_output);
             }
         },
         Err(e) => eprintln!("Error calculating foreground color: {}", e),
+    }
+}
+
+fn output_colors(bgcolor: &str, fgcolor: &str, verbose: bool, fgonly: bool, bgonly: bool) {
+    if verbose {
+        println!("bgcolor: {}, fgcolor: {}", fgcolor, bgcolor);
+    } else if fgonly {
+        println!("{}", fgcolor);
+    } else if bgonly {
+        println!("{}", bgcolor);
+    } else {
+        println!("{} {}", fgcolor, bgcolor);
     }
 }
 

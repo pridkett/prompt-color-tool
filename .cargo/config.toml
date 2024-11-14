@@ -1,2 +1,13 @@
 [target.x86_64-unknown-linux-musl]
-linker = "x86_64-linux-musl-gcc"
+strip = "symbols"  # Enable stripping for Linux targets
+
+[target.armv7-unknown-linux-musleabihf]
+strip = "symbols"  # Enable stripping for 32-bit ARM targets
+
+[target.aarch64-unknown-linux-musl]
+strip = "symbols"  # Enable stripping for 64-bit ARM targets
+
+[target.aarch64-apple-darwin]
+# linker = "arm64e-apple-darwin22.4-clang"
+# note - we need to manually run llmv-strip on the binary
+

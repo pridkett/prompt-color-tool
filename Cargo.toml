@@ -9,7 +9,7 @@ lto = true               # Enable Link-Time Optimization for better performance
 codegen-units = 1        # Helps improve optimization at the cost of compilation time
 debug = false            # Strip out debug symbols to minimize the size
 panic = "abort"          # Smaller binary by avoiding panic unwind code
-strip = true             # Removes symbol tables and debug information for smaller binaries
+strip = false            # this breaks Linux -> MacOS cross compilation
 
 [dependencies]
 base16ct = "0.2.0"
