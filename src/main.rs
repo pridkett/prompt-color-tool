@@ -25,7 +25,7 @@ impl Rgb {
     fn to_hex(self) -> String {
         format!("{:02x}{:02x}{:02x}", self.r, self.g, self.b)
     }
-    
+
     fn to_rgb(&mut self) {
         (self.r, self.g, self.b) = xterm_to_rgb(self.xterm);
     }
@@ -198,12 +198,15 @@ fn output_colors(bgcolor: Rgb, fgcolor: Rgb, verbose: bool, fgonly: bool, bgonly
 }
 
 fn get_color_from_env(varname: &str) -> Result<Rgb, String> {
-    let env_bgcolor = std::env::var(varname).ok();
-    if let Some(bgcolor) = env_bgcolor {
-        let xterm_color = bgcolor.parse::<u8>().expect("Failed to parse background color");
+    let env_color = std::env::var(varname).ok();
+    if let Some(bgcolor) = env_color {
+        let xterm_color = match bgcolor.parse::<u8>() {
+            Ok(color) => color,
+            Err(_) => return Err(format!("Unable to parse value of environment variable {}={}", varname, bgcolor)),
+        };
         return Ok(Rgb::new(xterm_color));
     }
-    return Err("No background color found in environment".to_string());
+    return Err(format!("Environment variable {} is not set", varname));
 }
 
 fn calculate_hostname_foreground_color(bgcolor: Rgb, theme: Option<&str>) -> Result<Rgb, String> {
