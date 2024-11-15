@@ -3,7 +3,7 @@ prompt_color_tool
 
 A swiss army knife of functions that help with prompt colors
 
-Patrick Wagstrom <160672+pridkett@users.noreply.github.com>
+Patrick Wagstrom &lt;160672+pridkett@users.noreply.github.com&gt;
 
 November 2024
 
@@ -23,13 +23,15 @@ prompt_color_tool [OPTIONS] [hostname]
 If `hostname` is not provided on the command line, the program will grab the system short hostname and use that.
 
 * `--theme <theme>`   The theme to use for color calculation [default: `default` - other values are `low-contrast`, `solarized-light16`, and `solarized-dark16`]
-* `--hex`             Output colors in hexadecimal format
 * `--noenv`           Ignore the environment variables `PLGO_HOSTNAMEBG` and `PLGO_HOSTNAMEFG`. 
 * `--bgcolor <color>` A fixed color to use as the background color. This must be in the range of 0-255. This is for the use case when you know that the hash of the name is going to generate an unpleasant color and you want to override, but still calculate the foreground color or have an easy way to get it as hex, etc.
 * `--fgcolor <color>` A fixed color to use as the foreground color. This must be in the range of 0-255. This is for the use case when you know that the hash of the name is going to generate an unpleasant color and you want to override, but still calculate the background color or have an easy way to get it as hex, etc.
-* `-v`, `--verbose`     Print verbose output. There's really not much here, but it will tell you which number is which.
-* `-f`, `--fgonly`      Only output the foreground color. Useful if you don't want to do other shell scripting to separate the numbers.
-* `-b`, `--bgonly`      Only output the background color. Useful if you don't want to do other shell scripting to separate the numbers.
+* `--hex`             Output colors in hexadecimal format
+* Mutually Exclusive Output Control Options
+  * `-v`, `--verbose`     Print verbose output. There's really not much here, but it will tell you which number is which.
+  * `-f`, `--fgonly`      Only output the foreground color. Useful if you don't want to do other shell scripting to separate the numbers.
+  * `-b`, `--bgonly`      Only output the background color. Useful if you don't want to do other shell scripting to separate the numbers.
+  * `--iterm` Rather than printing the colors as normal, send the ANSI escape codes to iTerm can set the color of the tab.
 
 Note that there are several ways that the colors can be specified. The precedence order is as follows:
 
