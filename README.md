@@ -24,10 +24,20 @@ If `hostname` is not provided on the command line, the program will grab the sys
 
 * `--theme <theme>`   The theme to use for color calculation [default: `default` - other values are `low-contrast`, `solarized-light16`, and `solarized-dark16`]
 * `--hex`             Output colors in hexadecimal format
+* `--noenv`           Ignore the environment variables `PLGO_HOSTNAMEBG` and `PLGO_HOSTNAMEFG`. 
 * `--bgcolor <color>` A fixed color to use as the background color. This must be in the range of 0-255. This is for the use case when you know that the hash of the name is going to generate an unpleasant color and you want to override, but still calculate the foreground color or have an easy way to get it as hex, etc.
+* `--fgcolor <color>` A fixed color to use as the foreground color. This must be in the range of 0-255. This is for the use case when you know that the hash of the name is going to generate an unpleasant color and you want to override, but still calculate the background color or have an easy way to get it as hex, etc.
 * `-v`, `--verbose`     Print verbose output. There's really not much here, but it will tell you which number is which.
 * `-f`, `--fgonly`      Only output the foreground color. Useful if you don't want to do other shell scripting to separate the numbers.
 * `-b`, `--bgonly`      Only output the background color. Useful if you don't want to do other shell scripting to separate the numbers.
+
+Note that there are several ways that the colors can be specified. The precedence order is as follows:
+
+1. If `--bgcolor` or `--fgcolor` are specified, those will be used.
+2. If the environment variables `PLGO_HOSTNAMEBG` or `PLGO_HOSTNAMEFG` are set and `noenv` is not true, those will be used.
+3. Calculate the varible. Background color is calculated first and based off the hostname to color mapping algorithm below. Foreground color is calculated after and based of a static mapping of colors.
+
+Note, the precedence can be mixed and matched. For example, you can define `--bgcolor` and still have it calculate the foreground color. Likewise, you can set a value to the environment variable `PLGO_HOSTNAMEFG` and the background color will still be calculated independent.
 
 ### Hostname to Color Mapping Algorithm
 
