@@ -14,6 +14,12 @@ I've been working on various ways that I can have consistent colors across my ma
 
 I was able to do this with a lot of shell scripting, but in the end, it just kinda turned into a mess. So, I created this program to provide a single consistent reference point for me on how to calculate the colors, either as one of the 256 xterm colors or as hex, and use them in various programs.
 
+It might be easier to show how this can work. In the screencast below, you can see me using iTerm to connect a number of different machines and running `tmux` on each of those machines. In each case the color of the window title bar, the hostname in the prompt, and the color of the status bar in `tmux` are synchronized across the applications. This provides a nice visual indicator of which machine I'm working with.
+
+<p align="center">
+    <img src="docs/demo.gif" alt="Demo">
+</p>
+
 ### Usage
 
 ```
@@ -50,9 +56,78 @@ Because I use [powerline-go][powerline-go], I wanted to ensure that the [automat
 3. Take the first byte of the hash and run modulo 128 on it to get a number between 0 and 127
 4. Use the number to select a color from the xterm 256 color palette
 
+Application Integration
+-----------------------
+
+### powerline-go
+
+This is based off the way that powerline-go already handles the colorization and even uses the same environment variables. You can override the colors by setting `PLGO_HOSTNAMEFG` and `PLGO_HOSTNAMEBG` and they will work for all the applications.
+
+### tmux
+
+In your `.tmux.conf` file, you can set the colors of the status bar to be the same as the colors of the hostname. Here's an example of how you can do that:
+
+```tmux
+#
+# set the color of the status bar according to the hostname of the machine
+#
+
+%if #{?PLGO_HOSTNAMEBG,1,0}
+    set -g status-bg colour$PLGO_HOSTNAMEBG
+%else
+    run "tmux set -g status-bg $(printf colour%s $(~/.cargo/bin/prompt_color_tool --bgonly))"
+%endif
+
+%if #{?PLGO_HOSTNAMEFG,1,0}
+    set -g status-fg colour$PLGO_HOSTNAMEFG
+%else
+    run "tmux set -g status-fg $(printf colour%s $(~/.cargo/bin/prompt_color_tool --fgonly))"
+%endif
+```
+
+### iTerm (with fish shell)
+
+This is a two step process. First, we need to determine if we should even try to output the escape codes. In theory, we should be fine without this, but this is easiest way to be assured is be checking if it is interactive and not in a terminal multiplexer. Then, we attach the hook to the postexec event in fish to call the program to set the tab color. This has the nice side effect of it will set the color whenever the shell starts and also when commands finish. So the tab color will be set when you exit an SSH session too.
+
+Of note, not all systems pass through the escape codes necessary for this to work. Notably, `mosh` does not pass through the custom iTerm escape codes required for this feature.
+
+```fish
+function iterm2_should_integrate
+    if begin;
+	status --is-interactive;
+	and test "$ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX""$TERM" != screen;
+	and test "$ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX""$TERM" != screen-256color;
+	and test "$ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX""$TERM" != tmux-256color;
+	and test "$TERM" != dumb;
+        and test "$TERM" != linux; end
+	return 0
+    end
+    return 1
+end
+
+function set_iterm_tab_color --on-event fish_postexec
+    ~/.cargo/bin/prompt_color_tool --iterm
+end
+
+# Call the function to set the tab color when the shell starts
+if iterm2_should_integrate
+    set_iterm_tab_color
+end
+```
+
 Compilation Notes
 -----------------
 
+Native compilation should be straightforward:
+
+```bash
+cargo build --release
+cargo install --path .
+```
+
+If `~/.cargo/bin` is in your path then you'll now have the `prompt_color_tool` command available to you.
+
+### Cross Compilation
 This section is more for myself, so I remember, but other people might find it interesting. After trying to muck around with installing various cross-architecture toolchains on my Mac, and getting some to work and some failing miserably, I think the easiest way to do static cross-compilation is just to use docker. Here's the commands that I use.
 
 For x86_64 Linux:
