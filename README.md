@@ -1,4 +1,4 @@
-prompt_color_tool
+prompt-color-tool
 =================
 
 A swiss army knife of functions that help with prompt colors
@@ -137,12 +137,12 @@ docker run --rm -it -v "$(pwd)":/home/rust/src messense/rust-musl-cross:x86_64-m
 
 For aarch64 Linux (i.e. Raspberry Pi running 64 bit OS):
 ```bash
-docker run --rm -it -v "$(pwd)":/home/rust/src messense/rust-musl-cross:aarch64-musl cargo build --release
+docker run --rm -it -v "$(pwd)":/home/rust/src messense/rust-musl-cross:aarch64-musl bash -c "rustup target add aarch64-unknown-linux-musl && cargo build --release"
 ```
 
 For armv7 Linux (i.e. Raspberry Pi running 32 bit OS):
 ```bash
-docker run --rm -it -v "$(pwd)":/home/rust/src messense/rust-musl-cross:armv7-musleabihf cargo build --release
+docker run --rm -it -v "$(pwd)":/home/rust/src messense/rust-musl-cross:armv7-musleabihf bash -c "rustup target add armv7-unknown-linux-musleabihf && cargo build --release"
 ```
 
 For aarch64 MacOS there's an issue with the builder image that I'm using not being able to strip Mach-O binaries. The image has `llvm-strip` installed, but there's not an easy (any?) way to get `rustc` to call it. This little hack takes advantage of the fact that /root/.cargo/bin comes first in the path, so we do something bad and just symlink it there. This hack makes it so `rustc` calls `llvm-strip` without really knowing it.
