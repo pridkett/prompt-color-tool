@@ -1,0 +1,152 @@
+# see: https://reemus.dev/tldr/rust-cross-compilation-github-actions
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on version tags like v1.0.0
+env:
+  PROJECT_NAME: prompt-color-tool
+jobs:
+  build:
+    # Set the job to run on the platform specified by the matrix below
+    runs-on: ${{ matrix.runner }}
+ 
+    # Define the build matrix for cross-compilation
+    strategy:
+      matrix:
+        include:
+          # - name: linux-amd64
+          #   runner: ubuntu-latest
+          #   target: x86_64-unknown-linux-gnu
+          #   command: cargo
+          # - name: linux-arm7hf-musl
+          #   runner: ubuntu-latest
+          #   target: armv7-unknown-linux-musleabihf
+          #   command: cross
+          - name: linux-aarch64-musl
+            runner: ubuntu-latest
+            target: aarch64-unknown-linux-musl
+            command: cross
+          # - name: win-amd64
+          #   runner: ubuntu-latest
+          #   target: x86_64-pc-windows-msvc
+          #   command: cross
+          # - name: macos-amd64
+          #   runner: ubuntu-latest
+          #   target: x86_64-apple-darwin
+          #   command: cross
+          # - name: macos-arm64
+          #   runner: ubuntu-latest
+          #   target: aarch64-apple-darwin
+          #   command: cross
+ 
+    # The steps to run for each matrix item
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+ 
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: "${{ matrix.target }}"
+
+      # Only install cross if we need it
+      # Install via cargo-binstall which I found faster
+      - name: Install Cross
+        if: matrix.command == 'cross'
+        shell: bash
+        run: |
+          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+          cargo binstall --no-confirm cross
+
+      - name: Setup Cache
+        uses: Swatinem/rust-cache@v2
+ 
+      - name: Build Binary
+        run: ${{ matrix.command }} build --verbose --locked --release --target ${{ matrix.target }}
+
+      - name: Fail Build
+        run: exit 1
+
+
+      - name: Release Binary
+        shell: bash
+        run: |
+          BIN_SUFFIX=""
+          if [[ "${{ matrix.runner }}" == "windows-latest" ]]; then
+            BIN_SUFFIX=".exe"
+          fi
+ 
+          # The built binary output location
+          BIN_OUTPUT="target/${{ matrix.target }}/release/${PROJECT_NAME}${BIN_SUFFIX}"
+ 
+          # Define a better name for the final binary
+          BIN_RELEASE="${PROJECT_NAME}-${{ matrix.name }}${BIN_SUFFIX}"
+          BIN_RELEASE_VERSIONED="${PROJECT_NAME}-${{ github.ref_name }}-${{ matrix.name }}${BIN_SUFFIX}"
+ 
+          # Move the built binary where you want it
+          mv "${BIN_OUTPUT}" "./release/${BIN_RELEASE}"
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+
+#     strategy:
+#       matrix:
+#         target: [aarch64-apple-darwin] # , x86_64-pc-windows-msvc, x86_64-apple-darwin, aarch64-apple-darwin, armv7-unknown-linux-musleabihf]
+#         # target: [x86_64-unknown-linux-gnu] # , x86_64-pc-windows-msvc, x86_64-apple-darwin, aarch64-apple-darwin, armv7-unknown-linux-musleabihf]
+
+#     steps:
+#     - name: Checkout Code
+#       uses: actions/checkout@v3
+
+#     - name: Install Rust
+#       uses: actions-rs/toolchain@v1
+#       with:
+#         toolchain: stable
+#         override: true
+
+#     - name: Install the rust toolchain for the target with rustup
+#       run: rustup target add ${{ matrix.target }}
+
+#     - name: Build Binary
+#       run: |
+#         cargo build --release --target ${{ matrix.target }}
+
+#     - name: Upload Artifact
+#       uses: actions/upload-artifact@v3
+#       with:
+#         name: ${{ matrix.target }}-prompt-color-tool
+#         path: target/${{ matrix.target }}/release/prompt-color-tool
+
+#     - name: Calculate SHA256 Checksums
+#       run: |
+#         for file in target/${{ matrix.target }}/release/*; do
+#           sha256sum "$file" > "$file".sha256
+#         done
+
+#     - name: Upload Checksums
+#       uses: actions/upload-artifact@v3
+#       with:
+#         name: ${{ matrix.target }}-checksums
+#         path: target/${{ matrix.target }}/release/*.sha256
+  
+#   release:
+#     needs: build
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - name: Download Artifacts
+#       uses: actions/download-artifact@v3
+#       with:
+#         path: ./artifacts
+
+#     - name: Create GitHub Release
+#       uses: ncipollo/release-action@v1
+#       with:
+#         artifacts: ./artifacts/**
+#         token: ${{ secrets.GITHUB_TOKEN }}
+#         tag: ${{ github.ref_name }}
+#         name: Release ${{ github.ref_name }}
+#         body: |
+#           Automatically generated release for ${{ github.ref_name }}.
