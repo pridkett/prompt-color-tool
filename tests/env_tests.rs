@@ -1,4 +1,4 @@
-use prompt_color_tool::{Rgb, get_color_from_env, BGCOLOR_ENV_VAR};
+use prompt_color_tool::{get_color_from_env, BGCOLOR_ENV_VAR};
 use std::env;
 
 #[test]
