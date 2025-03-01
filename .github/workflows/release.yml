@@ -119,6 +119,7 @@ jobs:
           echo "YEAR_RANGE=2024-2025" >> $GITHUB_ENV
           echo "MAINTAINER=Patrick Wagstrom <patrick@wagstrom.net>" >> $GITHUB_ENV
           echo "HOMEPAGE=https://github.com/pridkett/prompt-color-tool" >> $GITHUB_ENV
+          echo "DEB_DPKG_COMPRESSION=gzip" >> $GITHUB_ENV
 
       - name: Create Debian control file
         if: contains(matrix.os, 'ubuntu')
