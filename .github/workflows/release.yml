@@ -108,6 +108,12 @@ jobs:
         with:
           path: artifacts
       
+      - name: Prepare artifacts for release
+        run: |
+          mkdir -p release-assets
+          find artifacts -type f -name "*.tar.gz" -exec cp {} release-assets/ \;
+          ls -la release-assets/
+      
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -115,7 +121,7 @@ jobs:
           name: Release ${{ steps.get_version.outputs.VERSION }}
           draft: false
           prerelease: false
-          files: artifacts/**/*
+          files: release-assets/*.tar.gz
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
