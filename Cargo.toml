@@ -3,6 +3,14 @@ name = "prompt-color-tool"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "prompt_color_tool"
+path = "src/lib.rs"
+
+[[bin]]
+name = "prompt-color-tool"
+path = "src/main.rs"
+
 [profile.release]
 opt-level = 3            # Optimize for size, or you can use `3` for highest performance
 lto = true               # Enable Link-Time Optimization for better performance
