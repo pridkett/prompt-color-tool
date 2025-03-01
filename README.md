@@ -23,7 +23,7 @@ It might be easier to show how this can work. In the screencast below, you can s
 ### Usage
 
 ```
-prompt_color_tool [OPTIONS] [hostname]
+prompt-color-tool [OPTIONS] [hostname]
 ```
 
 If `hostname` is not provided on the command line, the program will grab the system short hostname and use that.
@@ -75,13 +75,13 @@ In your `.tmux.conf` file, you can set the colors of the status bar to be the sa
 %if #{?PLGO_HOSTNAMEBG,1,0}
     set -g status-bg colour$PLGO_HOSTNAMEBG
 %else
-    run "tmux set -g status-bg $(printf colour%s $(~/.cargo/bin/prompt_color_tool --bgonly))"
+    run "tmux set -g status-bg $(printf colour%s $(~/.cargo/bin/prompt-color-tool --bgonly))"
 %endif
 
 %if #{?PLGO_HOSTNAMEFG,1,0}
     set -g status-fg colour$PLGO_HOSTNAMEFG
 %else
-    run "tmux set -g status-fg $(printf colour%s $(~/.cargo/bin/prompt_color_tool --fgonly))"
+    run "tmux set -g status-fg $(printf colour%s $(~/.cargo/bin/prompt-color-tool --fgonly))"
 %endif
 ```
 
@@ -106,7 +106,7 @@ function iterm2_should_integrate
 end
 
 function set_iterm_tab_color --on-event fish_postexec
-    ~/.cargo/bin/prompt_color_tool --iterm
+    ~/.cargo/bin/prompt-color-tool --iterm
 end
 
 # Call the function to set the tab color when the shell starts
@@ -125,7 +125,7 @@ cargo build --release
 cargo install --path .
 ```
 
-If `~/.cargo/bin` is in your path then you'll now have the `prompt_color_tool` command available to you.
+If `~/.cargo/bin` is in your path then you'll now have the `prompt-color-tool` command available to you.
 
 ### Cross Compilation
 This section is more for myself, so I remember, but other people might find it interesting. After trying to muck around with installing various cross-architecture toolchains on my Mac, and getting some to work and some failing miserably, I think the easiest way to do static cross-compilation is just to use docker. Here's the commands that I use.

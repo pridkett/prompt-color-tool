@@ -32,7 +32,7 @@ impl Rgb {
 }
 
 fn main() {
-    let matches = Command::new("prompt_color_tool")
+    let matches = Command::new("prompt-color-tool")
         .version("0.1")
         .author("Patrick Wagstrom <160672+pridkett@users.noreply.github.com>")
         .about("Generates MD5 hash for a given input string")

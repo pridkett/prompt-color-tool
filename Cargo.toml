@@ -1,5 +1,5 @@
 [package]
-name = "prompt_color_tool"
+name = "prompt-color-tool"
 version = "0.1.0"
 edition = "2021"
 
