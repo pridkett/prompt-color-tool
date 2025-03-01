@@ -217,7 +217,7 @@ jobs:
         id: get_version
         run: |
           echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-          echo "Crate version: $version"
+          echo "Crate version: $VERSION"
       
       - name: Check version in Cargo.toml
         run: |
@@ -232,14 +232,14 @@ jobs:
         run: |
           # Extract the crate name from Cargo.toml (assumes name is the first occurrence)
           name=$(grep '^name' Cargo.toml | head -n 1 | cut -d '"' -f2)
-          echo "crate_name=$name" >> $GITHUB_OUTPUT
+          echo "CRATE_NAME=$name" >> $GITHUB_OUTPUT
           echo "Crate name: $name"
 
       - name: Check if version exists on crates.io
         id: check_version
         run: |
-          version="${{ steps.get_version.outputs.crate_version }}"
-          crate_name="${{ steps.get_name.outputs.crate_name }}"
+          version="${{ steps.get_version.outputs.VERSION }}"
+          crate_name="${{ steps.get_name.outputs.CRATE_NAME }}"
           echo "Checking if version '$version' exists for crate '$crate_name'"
           # Query crates.io API for this crate
           response=$(curl -s "https://crates.io/api/v1/crates/$crate_name")
