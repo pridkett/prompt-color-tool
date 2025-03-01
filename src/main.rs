@@ -1,6 +1,4 @@
-use md5::{Md5, Digest};
 use clap::{Command, Arg};
-use std::process::Command as ProcessCommand;
 use prompt_color_tool::{
     Rgb, 
     BGCOLOR_ENV_VAR, 

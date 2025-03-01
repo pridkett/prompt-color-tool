@@ -6,6 +6,7 @@
 use std::collections::HashMap;
 use once_cell::sync::Lazy;
 
+#[allow(dead_code)]
 pub static THEME_MAP: Lazy<HashMap<&'static str, HashMap<u8, u8>>> = Lazy::new(|| {
     HashMap::from([
     ("default", HashMap::from([

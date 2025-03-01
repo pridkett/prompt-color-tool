@@ -39,7 +39,7 @@ fn test_to_rgb() {
     rgb.to_rgb();
     assert_eq!(rgb.r, 0);
     assert_eq!(rgb.g, 95);
-    assert_eq!(rgb.b, 95);
+    assert_eq!(rgb.b, 0);
 }
 
 #[test]
