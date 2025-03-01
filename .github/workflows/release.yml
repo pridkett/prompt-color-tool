@@ -119,7 +119,6 @@ jobs:
           echo "YEAR_RANGE=2024-2025" >> $GITHUB_ENV
           echo "MAINTAINER=Patrick Wagstrom <patrick@wagstrom.net>" >> $GITHUB_ENV
           echo "HOMEPAGE=https://github.com/pridkett/prompt-color-tool" >> $GITHUB_ENV
-          echo "DEB_DPKG_COMPRESSION=gzip" >> $GITHUB_ENV
 
       - name: Create Debian control file
         if: contains(matrix.os, 'ubuntu')
@@ -136,7 +135,7 @@ jobs:
             then
               echo "Depends: ${DEPENDS}"
             fi
-            echo "Maintainer: ${MAINTAINER:$(git log -1 --pretty=format:'%an <%ae>')}"
+            echo "Maintainer: ${MAINTAINER:-Patrick Wagstrom <patrick@wagstrom.net>}"
             echo "Description: Prompt color tool"
             echo " A tool for generating terminal prompt colors based on hostname. This makes it"
             echo " easy to differentiate between different machines by ensuring that each has a"
