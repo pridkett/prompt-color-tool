@@ -175,7 +175,7 @@ jobs:
             chmod 755 debian/usr/bin/${{ matrix.binary_name }}
 
             # Build the package
-            dpkg-deb --build debian
+            dpkg-deb --build -Zgzip debian
             
             # Rename the package
             mv debian.deb prompt-color-tool_${VERSION}_${{ matrix.target.deb_arch }}.deb
