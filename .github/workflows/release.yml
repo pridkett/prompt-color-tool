@@ -1,3 +1,4 @@
+---
 name: Release
 
 on:
@@ -111,6 +112,41 @@ jobs:
           tar -czf ${{ matrix.asset_name }}.tar.gz ${{ matrix.binary_name }}
           echo "ASSET_PATH=target/${{ matrix.target.triple }}/release/${{ matrix.asset_name }}.tar.gz" >> $GITHUB_ENV
       
+      - name: Create Debian control file
+        if: contains(matrix.os, 'ubuntu')
+        # Fields from https://www.debian.org/doc/debian-policy/ch-controlfields.html#binary-package-control-files-debian-control
+        run: |
+          mkdir -p debian/DEBIAN
+          (
+            echo "Package:      ${GITHUB_REPO_NAME}"
+            echo "Version:      ${VERSION}"
+            echo "Section:      ${SECTION:-utils}"
+            echo "Priority:     ${PRIORITY:-optional}"
+            echo "Architecture: ${{ matrix.target.deb_arch }}"
+            if [ -n "${DEPENDS}" ]
+            then
+              echo "Depends: ${DEPENDS}"
+            fi
+            echo "Maintainer: ${MAINTAINER:$(git log -1 --pretty=format:'%an <%ae>')}"
+            echo "Description: Prompt color tool"
+            echo " A tool for generating terminal prompt colors based on hostname. This makes it"
+            echo " easy to differentiate between different machines by ensuring that each has a"
+            echo " consistent and automatically generated color scheme."
+            if [ -n "${HOMEPAGE}" ]
+            then
+              echo "Homepage: ${HOMEPAGE}"
+            fi
+          ) | tee debian/DEBIAN/control
+          (
+            echo "Files:"
+            echo " *"
+            echo "Copyright: ${YEAR_RANGE} ${MAINTAINER:-Jon Spriggs <jon@sprig.gs>}"
+            echo "License: MIT"
+            echo ""
+            echo "License: MIT"
+            sed 's/^/ /' "SOURCES/${GITHUB_REPO_NAME}/usr/share/doc/${GITHUB_REPO_NAME}/LICENSE"
+          ) | tee debian/DEBIAN/copyright
+
       - name: Create Debian package
         if: contains(matrix.os, 'ubuntu')
         run: |
@@ -128,19 +164,7 @@ jobs:
             # Copy binary to package directory
             cp target/${{ matrix.target.triple }}/release/${{ matrix.binary_name }} debian/usr/bin/
             chmod 755 debian/usr/bin/${{ matrix.binary_name }}
-            
-            # Create control file
-            cat > debian/DEBIAN/control << EOF
-Package: prompt-color-tool
-Version: ${VERSION}
-Section: utils
-Priority: optional
-Architecture: ${{ matrix.target.deb_arch }}
-Maintainer: $(git log -1 --pretty=format:'%an <%ae>')
-Description: Prompt color tool
- A tool for generating terminal prompt colors.
-EOF
-            
+
             # Build the package
             dpkg-deb --build debian
             
