@@ -35,6 +35,7 @@ jobs:
           - target:
               name: x86_64-linux
               triple: x86_64-unknown-linux-gnu
+              deb_arch: amd64
             os: ubuntu-latest
             cross: false
             binary_name: prompt-color-tool
@@ -43,6 +44,7 @@ jobs:
           - target:
               name: armv7-linux
               triple: armv7-unknown-linux-gnueabihf
+              deb_arch: armhf
             os: ubuntu-latest
             cross: true
             binary_name: prompt-color-tool
@@ -51,6 +53,7 @@ jobs:
           - target:
               name: aarch64-linux
               triple: aarch64-unknown-linux-gnu
+              deb_arch: arm64
             os: ubuntu-latest
             cross: true
             binary_name: prompt-color-tool
@@ -78,6 +81,10 @@ jobs:
         if: matrix.cross
         run: cargo install cross
       
+      - name: Install cargo-deb
+        if: contains(matrix.os, 'ubuntu')
+        run: cargo install cargo-deb
+      
       - name: Build with cargo (native)
         if: ${{ !matrix.cross }}
         run: cargo build --release --verbose --target ${{ matrix.target.triple }}
@@ -104,16 +111,96 @@ jobs:
           tar -czf ${{ matrix.asset_name }}.tar.gz ${{ matrix.binary_name }}
           echo "ASSET_PATH=target/${{ matrix.target.triple }}/release/${{ matrix.asset_name }}.tar.gz" >> $GITHUB_ENV
       
-      - name: Upload Release Asset
+      - name: Create Debian package
+        if: contains(matrix.os, 'ubuntu')
+        run: |
+          # Get version without 'v' prefix
+          VERSION=${GITHUB_REF#refs/tags/v}
+          
+          # For native builds
+          if [ "${{ matrix.cross }}" = "false" ]; then
+            cargo deb --target ${{ matrix.target.triple }} --no-build
+          else
+            # For cross-compiled builds, we need to manually create the deb
+            mkdir -p debian/DEBIAN
+            mkdir -p debian/usr/bin
+            
+            # Copy binary to package directory
+            cp target/${{ matrix.target.triple }}/release/${{ matrix.binary_name }} debian/usr/bin/
+            chmod 755 debian/usr/bin/${{ matrix.binary_name }}
+            
+            # Create control file
+            cat > debian/DEBIAN/control << EOF
+Package: prompt-color-tool
+Version: ${VERSION}
+Section: utils
+Priority: optional
+Architecture: ${{ matrix.target.deb_arch }}
+Maintainer: $(git log -1 --pretty=format:'%an <%ae>')
+Description: Prompt color tool
+ A tool for generating terminal prompt colors.
+EOF
+            
+            # Build the package
+            dpkg-deb --build debian
+            
+            # Rename the package
+            mv debian.deb prompt-color-tool_${VERSION}_${{ matrix.target.deb_arch }}.deb
+          fi
+          
+          # Find the created .deb file
+          DEB_FILE=$(find . -name "*.deb" | head -n 1)
+          echo "DEB_PATH=${DEB_FILE}" >> $GITHUB_ENV
+      
+      - name: Upload Release Asset (tar.gz)
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}
           path: ${{ env.ASSET_PATH }}
           if-no-files-found: error
+      
+      - name: Upload Release Asset (.deb)
+        if: contains(matrix.os, 'ubuntu')
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}-deb
+          path: ${{ env.DEB_PATH }}
+          if-no-files-found: error
+
+  publish-crates-io:
+    name: Publish to crates.io
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      
+      - name: Check version in Cargo.toml
+        run: |
+          CARGO_VERSION=$(grep -m 1 '^version =' Cargo.toml | cut -d '"' -f 2)
+          if [ "$CARGO_VERSION" != "${{ steps.get_version.outputs.VERSION }}" ]; then
+            echo "Error: Version in Cargo.toml ($CARGO_VERSION) does not match tag version (${{ steps.get_version.outputs.VERSION }})"
+            exit 1
+          fi
+      
+      - name: Publish to crates.io
+        uses: actions-rs/cargo@v1
+        with:
+          command: publish
+          args: --token ${{ secrets.CRATES_IO_TOKEN }}
 
   create-release:
     name: Create GitHub Release
-    needs: build
+    needs: [build, publish-crates-io]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -135,6 +222,7 @@ jobs:
         run: |
           mkdir -p release-assets
           find artifacts -type f -name "*.tar.gz" -exec cp {} release-assets/ \;
+          find artifacts -type f -name "*.deb" -exec cp {} release-assets/ \;
           ls -la release-assets/
       
       - name: Create Release
@@ -144,7 +232,7 @@ jobs:
           name: Release ${{ steps.get_version.outputs.VERSION }}
           draft: false
           prerelease: false
-          files: release-assets/*.tar.gz
+          files: release-assets/*
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
