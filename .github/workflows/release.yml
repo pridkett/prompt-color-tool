@@ -18,32 +18,32 @@ jobs:
               triple: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             cross: false
-            binary_name: hostname-coloring
-            asset_name: hostname-coloring-x86_64-linux
+            binary_name: prompt-color-tool
+            asset_name: prompt-color-tool-x86_64-linux
           
           - target:
               name: armv7-linux
               triple: armv7-unknown-linux-gnueabihf
             os: ubuntu-latest
             cross: true
-            binary_name: hostname-coloring
-            asset_name: hostname-coloring-armv7-linux
+            binary_name: prompt-color-tool
+            asset_name: prompt-color-tool-armv7-linux
           
           - target:
               name: aarch64-linux
               triple: aarch64-unknown-linux-gnu
             os: ubuntu-latest
             cross: true
-            binary_name: hostname-coloring
-            asset_name: hostname-coloring-aarch64-linux
+            binary_name: prompt-color-tool
+            asset_name: prompt-color-tool-aarch64-linux
           
           - target:
               name: aarch64-macos
               triple: aarch64-apple-darwin
             os: macos-latest
             cross: false
-            binary_name: hostname-coloring
-            asset_name: hostname-coloring-aarch64-macos
+            binary_name: prompt-color-tool
+            asset_name: prompt-color-tool-aarch64-macos
 
     steps:
       - uses: actions/checkout@v3
