@@ -2,6 +2,12 @@
 name = "prompt-color-tool"
 version = "0.1.0"
 edition = "2021"
+authors = ["Patrick Wagstrom <patrick@wagstrom.net>"]
+license = "MIT"
+repository = "https://github.com/pridkett/prompt-color-tool"
+readme = "README.md"
+categories = ["command-line-utilities"]
+keywords = ["cli", "tool", "rust", "prompt", "terminal", "color"]
 
 [lib]
 name = "prompt_color_tool"

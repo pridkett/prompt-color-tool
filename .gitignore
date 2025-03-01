@@ -1,2 +1,5 @@
 /target
 .aider*
+op.env 
+/data
+.github/workflows/*.json

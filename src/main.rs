@@ -14,8 +14,8 @@ mod theme_maps;
 fn main() {
     let matches = Command::new("prompt-color-tool")
         .version("0.1")
-        .author("Patrick Wagstrom <160672+pridkett@users.noreply.github.com>")
-        .about("Generates MD5 hash for a given input string")
+        .author("Patrick Wagstrom <patrick@wagstrom.net>")
+        .about("Dynamically generate pleasing terminal colors from your hostname")
         .arg(
             Arg::new("hostname")
                 .help("The hostname to hash")
