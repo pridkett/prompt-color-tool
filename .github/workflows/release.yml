@@ -112,6 +112,14 @@ jobs:
           tar -czf ${{ matrix.asset_name }}.tar.gz ${{ matrix.binary_name }}
           echo "ASSET_PATH=target/${{ matrix.target.triple }}/release/${{ matrix.asset_name }}.tar.gz" >> $GITHUB_ENV
       
+      - name: Set environment variables
+        run: |
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+          echo "GITHUB_REPO_NAME=$(basename $GITHUB_REPOSITORY)" >> $GITHUB_ENV
+          echo "YEAR_RANGE=2024-2025" >> $GITHUB_ENV
+          echo "MAINTAINER=Patrick Wagstrom <patrick@wagstrom.net>" >> $GITHUB_ENV
+          echo "HOMEPAGE=https://github.com/pridkett/prompt-color-tool" >> $GITHUB_ENV
+
       - name: Create Debian control file
         if: contains(matrix.os, 'ubuntu')
         # Fields from https://www.debian.org/doc/debian-policy/ch-controlfields.html#binary-package-control-files-debian-control
@@ -140,7 +148,7 @@ jobs:
           (
             echo "Files:"
             echo " *"
-            echo "Copyright: ${YEAR_RANGE} ${MAINTAINER:-Jon Spriggs <jon@sprig.gs>}"
+            echo "Copyright: ${YEAR_RANGE} ${MAINTAINER:-Patrick Wagstrom <patrick@wagstrom.net>}"
             echo "License: MIT"
             echo ""
             echo "License: MIT"
