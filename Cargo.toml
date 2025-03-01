@@ -7,7 +7,7 @@ license = "MIT"
 repository = "https://github.com/pridkett/prompt-color-tool"
 readme = "README.md"
 categories = ["command-line-utilities"]
-keywords = ["cli", "tool", "rust", "prompt", "terminal", "color"]
+keywords = ["cli", "tool", "prompt", "terminal", "color"]
 description = "A tool for generating terminal prompt colors based on machine hostname"
 homepage = "https://github.com/pridkett/prompt-color-tool"
 
